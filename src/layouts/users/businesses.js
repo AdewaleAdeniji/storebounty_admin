@@ -159,7 +159,7 @@ function Businesses() {
                 >
                   <div>
                     <MDTypography variant="button" fontWeight="regular" color="text">
-                      &nbsp;Showing <strong>{users.length} </strong> users of {total}
+                      &nbsp;Showing <strong>{users.length} </strong> businesses of {total}
                     </MDTypography>
                   </div>
                   <div>

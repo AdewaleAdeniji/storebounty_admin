@@ -93,8 +93,9 @@ function Users() {
     if (userslist.status === 200) {
       //console.log(userslist.data.data);
       setUsers(userslist.data.data.content);
-      setPageCount(userslist.data.data.pages);
+      setPageCount(userslist.data.data.total_pages);
       setTotal(userslist.data.data.total_elements);
+      //console.log(userslist.data.data.total_elements);
     } else {
       toast.error("Unknown error Occured", {
         position: "bottom-left",
@@ -105,7 +106,7 @@ function Users() {
       if(pagesize==""){
         return;
       }
-          setSize(pagesize);
+    setSize(pagesize);
     fetchUsers(page, pagesize);
   };
   const handleClose = () => {
