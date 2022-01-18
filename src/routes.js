@@ -40,7 +40,7 @@ const routes = [
     type: "collapse",
     name: "Businesses",
     key: "businesses",
-    icon: <Icon fontSize="small">people_outline</Icon>,
+    icon: <Icon fontSize="small">store</Icon>,
     route: "/businesses",
     component: <Businesses/>,
     shownav:true,

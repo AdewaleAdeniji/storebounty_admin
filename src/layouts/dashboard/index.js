@@ -22,38 +22,66 @@ import MDBox from "components/MDBox";
 // Material Dashboard 2 React example components
 import DashboardLayout from "examples/LayoutContainers/DashboardLayout";
 import DashboardNavbar from "examples/Navbars/DashboardNavbar";
-import Footer from "examples/Footer";
-import ReportsBarChart from "examples/Charts/BarCharts/ReportsBarChart";
-import ReportsLineChart from "examples/Charts/LineCharts/ReportsLineChart";
 import ComplexStatisticsCard from "examples/Cards/StatisticsCards/ComplexStatisticsCard";
-
+import DashboardHolder from './dashboardholder';
 // Data
-import reportsBarChartData from "layouts/dashboard/data/reportsBarChartData";
-import reportsLineChartData from "layouts/dashboard/data/reportsLineChartData";
-
-// Dashboard components
-import Projects from "layouts/dashboard/components/Projects";
-import OrdersOverview from "layouts/dashboard/components/OrdersOverview";
-
+import { useEffect, useState } from "react";
+import { getStats } from "components/api";
+import { toast } from "react-toastify";
+import { useSelector } from "react-redux";
+import { useDispatch } from "react-redux";
+import { saveStats } from "redux/user";
 function Dashboard() {
-  const { sales, tasks } = reportsLineChartData;
+  const [firstRun, setFirstRun] = useState(true);
+  const [stats, setStats] = useState({});
+  const user =  useSelector((state) => state.user);
+  const [loading, setLoading] = useState(false);
+  const dispatch = useDispatch()
 
+  useEffect(() => {
+    if (firstRun) {
+      setFirstRun(false);
+      setLoading(true);
+      if(user.stats?.tickets){
+        setLoading(false);
+      }
+      fetchStats();
+    }
+  }, [firstRun]);
+  const fetchStats = async () => {
+    //toast.loading('')
+    const stats = await getStats();
+    setLoading(false);
+    //console.log(stats);
+    if(stats.status===200){
+      const dashstats = stats.data.data;
+      setStats(dashstats);
+      dispatch(saveStats(dashstats));
+    }
+    else {
+      toast.error('Failed to refresh dashboard statistics.');
+    }
+  }
   return (
     <DashboardLayout>
       <DashboardNavbar />
       <MDBox py={3}>
+        {
+          loading && <DashboardHolder/>
+        }
+        {!loading && (
         <Grid container spacing={3}>
           <Grid item xs={12} md={6} lg={3}>
             <MDBox mb={1.5}>
               <ComplexStatisticsCard
                 color="dark"
                 icon="weekend"
-                title="Bookings"
-                count={281}
+                title='Tickets'
+                count={stats?.tickets}
                 percentage={{
                   color: "success",
-                  amount: "+55%",
-                  label: "than lask week",
+                  amount: "",
+                  label: "",
                 }}
               />
             </MDBox>
@@ -62,12 +90,12 @@ function Dashboard() {
             <MDBox mb={1.5}>
               <ComplexStatisticsCard
                 icon="leaderboard"
-                title="Today's Users"
-                count="2,300"
+                title={"Notifications"}
+                count={stats?.notifications}
                 percentage={{
                   color: "success",
-                  amount: "+3%",
-                  label: "than last month",
+                  amount: "",
+                  label: "",
                 }}
               />
             </MDBox>
@@ -77,12 +105,12 @@ function Dashboard() {
               <ComplexStatisticsCard
                 color="success"
                 icon="store"
-                title="Revenue"
-                count="34k"
+                title="Businesses"
+                count={stats?.businesses}
                 percentage={{
                   color: "success",
-                  amount: "+1%",
-                  label: "than yesterday",
+                  amount: "",
+                  label: "",
                 }}
               />
             </MDBox>
@@ -91,19 +119,20 @@ function Dashboard() {
             <MDBox mb={1.5}>
               <ComplexStatisticsCard
                 color="primary"
-                icon="person_add"
-                title="Followers"
-                count="+91"
+                icon="people"
+                title="Users"
+                count={stats?.users}
                 percentage={{
                   color: "success",
                   amount: "",
-                  label: "Just updated",
+                  label: "",
                 }}
               />
             </MDBox>
           </Grid>
         </Grid>
-        <MDBox mt={4.5}>
+        )}
+        {/* <MDBox mt={4.5}>
           <Grid container spacing={3}>
             <Grid item xs={12} md={6} lg={4}>
               <MDBox mb={3}>
@@ -144,7 +173,7 @@ function Dashboard() {
             </Grid>
           </Grid>
         </MDBox>
-        
+         */}
       </MDBox>
     </DashboardLayout>
   );

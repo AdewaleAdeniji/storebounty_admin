@@ -170,7 +170,7 @@ function Sidenav({ color, brand, brandName, routes, ...rest }) {
             sx={(theme) => sidenavLogoLabel(theme, { miniSidenav })}
           >
             <MDTypography component="h6" variant="button" fontWeight="medium" color={textColor}>
-              {(JSON.parse(localStorage.getItem('client_apps')||{})).current_app.app_name}
+              {(JSON.parse(localStorage.getItem('client_apps')||"{}"))?.current_app?.app_name}
             </MDTypography>
           </MDBox>
         </MDBox>

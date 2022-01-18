@@ -11,7 +11,10 @@ export const getApps = () => {
   return localStorage.getItem("client_apps") ? JSON.parse(localStorage.getItem("client_apps")) || {} : {};
 }
 export const getClientID = () => {
-  return  localStorage.getItem('current_app_client_id') ? localStorage.getItem('current_app_client_id') || '' : '';
+  return localStorage.getItem('current_app_client_id') ? localStorage.getItem('current_app_client_id') || '' : '';
+}
+export const getStats = () => {
+  return localStorage.getItem('dashboard_stats') ? JSON.parse(localStorage.getItem('dashboard_stats')) || {} : {};
 }
 const initialState = {
   email: "",
@@ -20,7 +23,8 @@ const initialState = {
   password: "",
   user: getUser(),
   apps:getApps(),
-  clientId: getClientID()
+  clientId: getClientID(),
+  stats:getStats()
 };
 
 export const userSlice = createSlice({
@@ -28,6 +32,11 @@ export const userSlice = createSlice({
   initialState,
   reducers: {
     reset: () => initialState,
+    saveStats: (state, action) => {
+      state.stats = action.payload;
+      localStorage.setItem('dashboard_stats',JSON.stringify(action.payload))
+      console.log(action.payload)
+    },
     saveUser: (state, action) => {
       state.user = JSON.parse(action.payload);
       state.loggedin = true;
@@ -51,6 +60,6 @@ export const userSlice = createSlice({
 });
 
 // Action creators are generated for each case reducer function
-export const { loginUser, saveToken, logoutUser, saveUser } = userSlice.actions;
+export const { loginUser, saveToken, logoutUser, saveUser, saveStats } = userSlice.actions;
 
 export default userSlice.reducer;
