@@ -1,22 +1,4 @@
-/* eslint-disable jsx-a11y/alt-text */
 
-/**
-=========================================================
-* Material Dashboard 2 React - v2.0.0
-=========================================================
-
-* Product Page: https://www.creative-tim.com/product/material-dashboard-react
-* Copyright 2021 Creative Tim (https://www.creative-tim.com)
-
-Coded by www.creative-tim.com
-
- =========================================================
-
-* The above copyright notice and this permission notice shall be included in all copies or substantial portions of the Software.
-*/
-
-// @mui material components
-import Grid from "@mui/material/Grid";
 import DataTable from "examples/Tables/DataTable";
 // Material Dashboard 2 React components
 import MDBox from "components/MDBox";
@@ -26,31 +8,26 @@ import DashboardNavbar from "examples/Navbars/DashboardNavbar";
 import Card from "@mui/material/Card";
 import ReactPaginate from "react-paginate";
 import { useEffect, useState } from "react";
-import { IconButton, Table } from "@mui/material";
 import Holder from "./tableholder";
 import { toast } from "react-toastify";
 import moment from "moment";
 import "./pagination.css";
-import { getUsers } from "components/api";
 import MDTypography from "components/MDTypography";
-import { getBusinesses } from "components/api";
+import { getAdmins } from "components/api";
 
-function Businesses() {
+function Admins() {
   const columns = [
     {
       Header: "",
       id: "row",
-      maxWidth: 10,
-      filterable: false,
       Cell: (index) => {
         return <div>{index.row.index + 1}</div>;
       },
     },
-    { Header: "Business Name", accessor: "name", align: "left" },
-    { Header: "Business Description", accessor: "description"},
-    { Header: "Business ID", accessor: "businessId"},
+    { Header: "First Name", accessor: "first_name"},
+    { Header: "Last Name", accessor: "last_name"},
     {
-      Header: "Business Created Date",
+      Header: "Created Date",
       accessor: "createdAt",
       Cell: ({ value }) => {
         return <span>{moment(value).format("LLL")}</span>;
@@ -77,17 +54,16 @@ function Businesses() {
   }, [firstRun]);
   const handlePageClick = async (e) => {
     const newpage = e.selected;
-    //console.log(newpage);
     setPage(newpage);
     fetchUsers(newpage, size);
   };
   const fetchUsers = async (page, size) => {
     setLoading(true);
-    const userslist = await getBusinesses(page, size);
+    const userslist = await getAdmins(page, size);
     setLoading(false);
     if (userslist.status === 200) {
       //console.log(userslist.data.data);
-     setUsers(userslist.data.data.businesses);
+      setUsers(userslist.data.data.admins);
       setPageCount(userslist.data.data.pages);
       setTotal(userslist.data.data.total);
     } else {
@@ -101,7 +77,8 @@ function Businesses() {
         return;
       }
           setSize(pagesize);
-    fetchUsers(page, pagesize);
+          fetchUsers(page, pagesize);
+
   }
   return (
     <DashboardLayout>
@@ -112,7 +89,7 @@ function Businesses() {
             <Card>
               <MDBox display="flex" justifyContent="space-between" alignItems="center" p={3}>
                 <MDTypography variant="h6" gutterBottom>
-                 Businesses
+                 Admin Users
                 </MDTypography>
               </MDBox>
               {
@@ -164,7 +141,7 @@ function Businesses() {
                   </div>
                   <div>
                     <select className="select-size" onChange={(e)=>changeSize(e.target.value)} value={size}>
-                     <option value="">Page Size</option>
+                      <option value="">Page Size</option>
                       <option value="10">10</option>
                       <option value="20">20</option>
                       <option value="50">50</option>
@@ -181,4 +158,4 @@ function Businesses() {
   );
 }
 
-export default Businesses;
+export default Admins;

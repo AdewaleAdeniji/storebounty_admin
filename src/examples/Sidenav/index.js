@@ -16,7 +16,7 @@ Coded by www.creative-tim.com
 import { useEffect } from "react";
 
 // react-router-dom components
-import { useLocation, NavLink } from "react-router-dom";
+import { useLocation, NavLink, useNavigate } from "react-router-dom";
 
 // prop-types is a library for typechecking of props.
 import PropTypes from "prop-types";
@@ -48,6 +48,7 @@ import {
 } from "context";
 
 function Sidenav({ color, brand, brandName, routes, ...rest }) {
+  const history = useNavigate();
   const [controller, dispatch] = useMaterialUIController();
   const { miniSidenav, transparentSidenav, whiteSidenav, darkMode, sidenavColor } = controller;
   const location = useLocation();
@@ -169,7 +170,7 @@ function Sidenav({ color, brand, brandName, routes, ...rest }) {
             sx={(theme) => sidenavLogoLabel(theme, { miniSidenav })}
           >
             <MDTypography component="h6" variant="button" fontWeight="medium" color={textColor}>
-              StoreBounty
+              {(JSON.parse(localStorage.getItem('client_apps')||{})).current_app.app_name}
             </MDTypography>
           </MDBox>
         </MDBox>
@@ -181,6 +182,20 @@ function Sidenav({ color, brand, brandName, routes, ...rest }) {
         }
       />
       <List>{renderRoutes}</List>
+      <MDBox p={2} mt="auto">
+        <Link to="/apps">
+        <MDButton
+        onClick={()=>history("/apps", { replace: true })}
+          target="_blank"
+          rel="noreferrer"
+          variant="gradient"
+          color={sidenavColor}
+          fullWidth
+        >
+          Switch Apps
+        </MDButton>
+        </Link>
+      </MDBox>
     </SidenavRoot>
   );
 }

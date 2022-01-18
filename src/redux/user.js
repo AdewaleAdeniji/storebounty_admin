@@ -7,13 +7,20 @@ export const getUser = () =>
     : null;
 export const getToken = () =>
   localStorage.getItem("authT") ? localStorage.getItem("authT") || null : null;
-
+export const getApps = () => {
+  return localStorage.getItem("client_apps") ? JSON.parse(localStorage.getItem("client_apps")) || {} : {};
+}
+export const getClientID = () => {
+  return  localStorage.getItem('current_app_client_id') ? localStorage.getItem('current_app_client_id') || '' : '';
+}
 const initialState = {
   email: "",
   loggedin: getToken() !== null,
   token: getToken(),
   password: "",
   user: getUser(),
+  apps:getApps(),
+  clientId: getClientID()
 };
 
 export const userSlice = createSlice({

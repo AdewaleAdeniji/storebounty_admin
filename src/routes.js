@@ -8,6 +8,8 @@ import Profile from "layouts/profile";
 import SignIn from "layouts/authentication/sign-in";
 import SignUp from "layouts/authentication/sign-up";
 import Businesses from "layouts/users/businesses";
+import Admins from "layouts/users/admins";
+import Apps from "layouts/users/apps";
 
 // @mui icons
 import Icon from "@mui/material/Icon";
@@ -46,6 +48,16 @@ const routes = [
   },
   {
     type: "collapse",
+    name: "Admin Users",
+    key: "admin-users",
+    icon: <Icon fontSize="small">people_outline</Icon>,
+    route: "/admin-users",
+    component: <Admins />,
+    shownav:true,
+    admin:true
+  },
+  {
+    type: "collapse",
     name: "Tables",
     key: "tables",
     icon: <Icon fontSize="small">table_view</Icon>,
@@ -75,6 +87,16 @@ const routes = [
     icon: <Icon fontSize="small">notifications</Icon>,
     route: "/notifications",
     component: <Notifications />,
+    shownav:true,
+    admin:true
+  },  {
+    type: "collapse",
+    name: "Apps",
+    key: "apps",
+    icon: <Icon fontSize="small">apps</Icon>,
+    route: "/apps",
+    component: <Apps/>,
+    admin:true
   },
   {
     type: "collapse",

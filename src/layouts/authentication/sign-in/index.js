@@ -55,12 +55,13 @@ function Basic() {
     const log = await login(email, password);
     setLoading(false);
     toast.dismiss();
-    // console.log(loginme);
     if (log.status === 200) {
-      //console.log('200');
-      //console.log(log.data.token);
+      //.console.log(log.data);
+      const appsdata = log.data.data;
+      //console.log(appsdata)
+      localStorage.setItem('client_apps',JSON.stringify(appsdata));
+      localStorage.setItem('current_app_client_id',appsdata?.current_app?.client_id||'storebounty');
       dispatch(saveToken(log.data.token));
-      // history("/", { replace: true });
       window.location.href="/users";
     } else {
       setError(true);

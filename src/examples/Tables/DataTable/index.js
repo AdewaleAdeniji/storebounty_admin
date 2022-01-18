@@ -47,6 +47,7 @@ function DataTable({
   pagination,
   isSorted,
   noEndBorder,
+  size
 }) {
   const defaultValue = entriesPerPage.defaultValue ? entriesPerPage.defaultValue : 10;
   const entries = entriesPerPage.entries
@@ -81,7 +82,7 @@ function DataTable({
   } = tableInstance;
 
   // Set the default value for the entries per page when component mounts
-  useEffect(() => setPageSize(defaultValue || 10), [defaultValue]);
+  useEffect(() => setPageSize(size), [defaultValue]);
 
   // Set the entries per page value based on the select value
   const setEntriesPerPage = (value) => setPageSize(value);
@@ -220,7 +221,7 @@ function DataTable({
         </TableBody>
       </Table>
 
-      <MDBox
+      {pagination&& (<MDBox
         display="flex"
         flexDirection={{ xs: "column", sm: "row" }}
         justifyContent="space-between"
@@ -234,7 +235,7 @@ function DataTable({
             </MDTypography>
           </MDBox>
         )}
-        {pageOptions.length > 1 && (
+        {pageOptions.length > 1  && (
           <MDPagination
             variant={pagination.variant ? pagination.variant : "gradient"}
             color={pagination.color ? pagination.color : "info"}
@@ -262,7 +263,9 @@ function DataTable({
             )}
           </MDPagination>
         )}
+        
       </MDBox>
+      )}
     </TableContainer>
   );
 }

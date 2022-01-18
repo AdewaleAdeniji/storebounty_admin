@@ -1,197 +1,277 @@
-/**
-=========================================================
-* Material Dashboard 2 React - v2.0.0
-=========================================================
-
-* Product Page: https://www.creative-tim.com/product/material-dashboard-react
-* Copyright 2021 Creative Tim (https://www.creative-tim.com)
-
-Coded by www.creative-tim.com
-
- =========================================================
-
-* The above copyright notice and this permission notice shall be included in all copies or substantial portions of the Software.
-*/
-
-import { useState } from "react";
-
-// @mui material components
-import Grid from "@mui/material/Grid";
-import Card from "@mui/material/Card";
-
-// Material Dashboard 2 React components
+import DataTable from "examples/Tables/DataTable";
 import MDBox from "components/MDBox";
-import MDTypography from "components/MDTypography";
-import MDAlert from "components/MDAlert";
-import MDButton from "components/MDButton";
-import MDSnackbar from "components/MDSnackbar";
-
-// Material Dashboard 2 React example components
 import DashboardLayout from "examples/LayoutContainers/DashboardLayout";
 import DashboardNavbar from "examples/Navbars/DashboardNavbar";
-import Footer from "examples/Footer";
+import Card from "@mui/material/Card";
+import ReactPaginate from "react-paginate";
+import { useEffect, useState } from "react";
+import Holder from "../users/tableholder";
+import { toast } from "react-toastify";
+import moment from "moment";
+import MDTypography from "components/MDTypography";
+import MDButton from "components/MDButton";
+import { Icon } from "@mui/material";
+import { getNotifications } from "components/api";
+import Button from '@mui/material/Button';
+import Dialog from '@mui/material/Dialog';
+import DialogActions from '@mui/material/DialogActions';
+import DialogContent from '@mui/material/DialogContent';
+import DialogContentText from '@mui/material/DialogContentText';
+import DialogTitle from '@mui/material/DialogTitle';
+import TextField from '@mui/material/TextField';
+import { sendNotifications } from "components/api";
 
-function Notifications() {
-  const [successSB, setSuccessSB] = useState(false);
-  const [infoSB, setInfoSB] = useState(false);
-  const [warningSB, setWarningSB] = useState(false);
-  const [errorSB, setErrorSB] = useState(false);
+function Users() {
+  const columns = [
+    {
+      Header: "",
+      id: "row",
+      maxWidth: 50,
+      filterable: false,
+      Cell: (index) => {
+        return <div>{index.row.index + 1}</div>;
+      },
+    },
+    { Header: "Type", accessor: "label_type", align: "left" },
+    { Header: "Title", accessor: "title",Cell: ({ row, value }) => {
+      const { original } = row;
+      return <div title="Click to view more" style={{cursor:'pointer'}} onClick={()=>handleClickOpen(value, original.body)}>{value}</div>;
+    }, },
+    {
+      Header: "Notification body",
+      width: "10%",
+      overflow: "scroll",
+      accessor: "body",
+      Cell: ({ row, value }) => {
+        const { original } = row;
+        const newbody = value.slice(0,20);
+        return <div title="Click to view more" style={{cursor:'pointer'}} onClick={()=>handleClickOpen(original.title, value)}>{newbody}...</div>;
+      },
+    },
 
-  const openSuccessSB = () => setSuccessSB(true);
-  const closeSuccessSB = () => setSuccessSB(false);
-  const openInfoSB = () => setInfoSB(true);
-  const closeInfoSB = () => setInfoSB(false);
-  const openWarningSB = () => setWarningSB(true);
-  const closeWarningSB = () => setWarningSB(false);
-  const openErrorSB = () => setErrorSB(true);
-  const closeErrorSB = () => setErrorSB(false);
+    {
+      Header: "Date",
+      accessor: "createdAt",
+      Cell: ({ value }) => {
+        return <span>{moment(value).format("LLL")}</span>;
+      },
+    },
+    { Header: "Status", accessor: "status", align: "center" },
+  ];
 
-  const alertContent = (name) => (
-    <MDTypography variant="body2" color="white">
-      A simple {name} alert with{" "}
-      <MDTypography component="a" href="#" variant="body2" fontWeight="medium" color="white">
-        an example link
-      </MDTypography>
-      . Give it a click if you like.
-    </MDTypography>
-  );
+  const [users, setUsers] = useState([]);
+  const rows = [...users];
+  //console.log(rows, users);
+  const [page, setPage] = useState(0);
+  const [size, setSize] = useState(20);
+  const [firstRun, setFirstRun] = useState(true);
+  const [loading, setLoading] = useState(true);
+  const [pageCount, setPageCount] = useState(0);
+  const [total, setTotal] = useState(0);
+  const [open, setOpen] = useState(false);
+  const [modal, setModal] = useState({});
+  const [sendNote, setSendNote] = useState(false);
+  const [notebody, setNoteBody] = useState('');
+  const [title, setTitle] = useState('');
 
-  const renderSuccessSB = (
-    <MDSnackbar
-      color="success"
-      icon="check"
-      title="Material Dashboard"
-      content="Hello, world! This is a notification message"
-      dateTime="11 mins ago"
-      open={successSB}
-      onClose={closeSuccessSB}
-      close={closeSuccessSB}
-      bgWhite
-    />
-  );
-
-  const renderInfoSB = (
-    <MDSnackbar
-      icon="notifications"
-      title="Material Dashboard"
-      content="Hello, world! This is a notification message"
-      dateTime="11 mins ago"
-      open={infoSB}
-      onClose={closeInfoSB}
-      close={closeInfoSB}
-    />
-  );
-
-  const renderWarningSB = (
-    <MDSnackbar
-      color="warning"
-      icon="star"
-      title="Material Dashboard"
-      content="Hello, world! This is a notification message"
-      dateTime="11 mins ago"
-      open={warningSB}
-      onClose={closeWarningSB}
-      close={closeWarningSB}
-      bgWhite
-    />
-  );
-
-  const renderErrorSB = (
-    <MDSnackbar
-      color="error"
-      icon="warning"
-      title="Material Dashboard"
-      content="Hello, world! This is a notification message"
-      dateTime="11 mins ago"
-      open={errorSB}
-      onClose={closeErrorSB}
-      close={closeErrorSB}
-      bgWhite
-    />
-  );
-
+  useEffect(() => {
+    if (firstRun) {
+      setFirstRun(false);
+      fetchUsers(page, size);
+    }
+  }, [firstRun]);
+  const handlePageClick = async (e) => {
+    const newpage = e.selected;
+    //console.log(newpage);
+    setPage(newpage);
+    fetchUsers(newpage, size);
+  };
+  const fetchUsers = async (page, size) => {
+    setLoading(true);
+    const userslist = await getNotifications(page, size);
+    setLoading(false);
+    if (userslist.status === 200) {
+      //console.log(userslist.data.data);
+      setUsers(userslist.data.data.content);
+      setPageCount(userslist.data.data.pages);
+      setTotal(userslist.data.data.total_elements);
+    } else {
+      toast.error("Unknown error Occured", {
+        position: "bottom-left",
+      });
+    }
+  };
+  const changeSize = (pagesize) => {
+      if(pagesize==""){
+        return;
+      }
+          setSize(pagesize);
+    fetchUsers(page, pagesize);
+  };
+  const handleClose = () => {
+    setOpen(false);
+  };
+  const handleCloseForm = () => {
+    setSendNote(!sendNote);
+  };
+  const handleClickOpen = (title,body) => {
+    setModal({title,body});
+    setOpen(true);
+  };
+  const handleSendNotification = async () => {
+      toast.loading('Sending Notification....');
+      setSendNote(false);
+      const res = await sendNotifications(title,notebody);
+      toast.dismiss();
+      //console.log(res);
+      if(res.status==200){
+        toast.success('Notification sent successfully.');
+      }
+      else {
+        toast.error(res?.data?.message||"An unknown error occured");
+      }
+  }
   return (
+    <>
     <DashboardLayout>
       <DashboardNavbar />
-      <MDBox mt={6} mb={3}>
-        <Grid container spacing={3} justifyContent="center">
-          <Grid item xs={12} lg={8}>
+      <MDBox py={3}>
+        <MDBox>
+          <div style={{ display: "block" }}>
             <Card>
-              <MDBox p={2}>
-                <MDTypography variant="h5">Alerts</MDTypography>
-              </MDBox>
-              <MDBox pt={2} px={2}>
-                <MDAlert color="primary" dismissible>
-                  {alertContent("primary")}
-                </MDAlert>
-                <MDAlert color="secondary" dismissible>
-                  {alertContent("secondary")}
-                </MDAlert>
-                <MDAlert color="success" dismissible>
-                  {alertContent("success")}
-                </MDAlert>
-                <MDAlert color="error" dismissible>
-                  {alertContent("error")}
-                </MDAlert>
-                <MDAlert color="warning" dismissible>
-                  {alertContent("warning")}
-                </MDAlert>
-                <MDAlert color="info" dismissible>
-                  {alertContent("info")}
-                </MDAlert>
-                <MDAlert color="light" dismissible>
-                  {alertContent("light")}
-                </MDAlert>
-                <MDAlert color="dark" dismissible>
-                  {alertContent("dark")}
-                </MDAlert>
-              </MDBox>
-            </Card>
-          </Grid>
-
-          <Grid item xs={12} lg={8}>
-            <Card>
-              <MDBox p={2} lineHeight={0}>
-                <MDTypography variant="h5">Notifications</MDTypography>
-                <MDTypography variant="button" color="text" fontWeight="regular">
-                  Notifications on this page use Toasts from Bootstrap. Read more details here.
+              <MDBox display="flex" justifyContent="space-between" alignItems="center" p={3}>
+                <MDTypography variant="h6" gutterBottom>
+                  Notifications
                 </MDTypography>
+                <div>
+                  <MDButton variant="gradient" color="dark" onClick={handleCloseForm}>
+                    <Icon sx={{ fontWeight: "bold" }}>add</Icon>
+                    &nbsp;Send a new Notification
+                  </MDButton>
+                </div>
               </MDBox>
-              <MDBox p={2}>
-                <Grid container spacing={3}>
-                  <Grid item xs={12} sm={6} lg={3}>
-                    <MDButton variant="gradient" color="success" onClick={openSuccessSB} fullWidth>
-                      success notification
-                    </MDButton>
-                    {renderSuccessSB}
-                  </Grid>
-                  <Grid item xs={12} sm={6} lg={3}>
-                    <MDButton variant="gradient" color="info" onClick={openInfoSB} fullWidth>
-                      info notification
-                    </MDButton>
-                    {renderInfoSB}
-                  </Grid>
-                  <Grid item xs={12} sm={6} lg={3}>
-                    <MDButton variant="gradient" color="warning" onClick={openWarningSB} fullWidth>
-                      warning notification
-                    </MDButton>
-                    {renderWarningSB}
-                  </Grid>
-                  <Grid item xs={12} sm={6} lg={3}>
-                    <MDButton variant="gradient" color="error" onClick={openErrorSB} fullWidth>
-                      error notification
-                    </MDButton>
-                    {renderErrorSB}
-                  </Grid>
-                </Grid>
+              {loading ? (
+                <Holder />
+              ) : (
+                <DataTable
+                  className="hidden"
+                  table={{ columns, rows }}
+                  showTotalEntries={false}
+                  isSorted={false}
+                  size={size}
+                  noEndBorder
+                  entriesPerPage={false}
+                  style={{ display: "none" }}
+                  pagination={false}
+                />
+              )}
+              <MDBox display="flex" justifyContent="space-between" alignItems="center" p={3}>
+                <MDTypography variant="h6" gutterBottom>
+                  <ReactPaginate
+                    breakLabel="..."
+                    nextLabel={<i className="fa fa-angle-double-right"></i>}
+                    onPageChange={handlePageClick}
+                    pageRangeDisplayed={size}
+                    pageCount={pageCount}
+                    previousLabel={<i className="fa fa-angle-double-left"></i>}
+                    containerClassName="pagination"
+                    previousClassName="page-item"
+                    previousLinkClassName="page-link"
+                    nextClassName="page-item"
+                    nextLinkClassName="page-link"
+                    activeClassName="active"
+                    pageClassName="page-item"
+                    pageLinkClassName="page-link"
+                    renderOnZeroPageCount={false}
+                  />
+                </MDTypography>
+                <MDBox
+                  display="flex"
+                  alignItems="center"
+                  lineHeight={0}
+                  justifyContent="space-between"
+                >
+                  <div>
+                    <MDTypography variant="button" fontWeight="regular" color="text">
+                      &nbsp;Showing <strong>{users.length} </strong> notifications of {total}
+                    </MDTypography>
+                  </div>
+                  <div>
+                    <select
+                      className="select-size"
+                      onChange={(e) => changeSize(e.target.value)}
+                      value={size}
+                    >
+                     <option value="">Page Size</option>
+                      <option value="10">10</option>
+                      <option value="20">20</option>
+                      <option value="50">50</option>
+                      <option value="100">100</option>
+                    </select>
+                  </div>
+                </MDBox>
               </MDBox>
             </Card>
-          </Grid>
-        </Grid>
+          </div>
+        </MDBox>
       </MDBox>
-      <Footer />
     </DashboardLayout>
+    <Dialog
+        open={open}
+        onClose={handleClose}
+        aria-labelledby="alert-dialog-title"
+        aria-describedby="alert-dialog-description"
+      >
+        <DialogTitle id="alert-dialog-title">
+         {modal?.title}
+        </DialogTitle>
+        <DialogContent>
+          <DialogContentText id="alert-dialog-description">
+            {modal?.body}
+          </DialogContentText>
+        </DialogContent>
+        <DialogActions>
+          <Button onClick={handleClose}>Close</Button>
+        </DialogActions>
+      </Dialog>
+      <Dialog open={sendNote} onClose={handleCloseForm} fullWidth>
+        <DialogTitle>Send Notifications</DialogTitle>
+        <DialogContent>
+          <DialogContentText>
+            Send notifications to user devices
+          </DialogContentText>
+          <TextField
+            autoFocus
+            margin="dense"
+            id="notification"
+            label="Notification Title"
+            type="text"
+            fullWidth
+            variant="standard"
+            onChange={(e)=>setTitle(e.target.value)}
+          />
+          <br/><br/>
+          <TextField
+            margin="dense"
+            id="note"
+            label="Notification Body"
+            type="text"
+            fullWidth
+            variant="standard"
+            onChange={(e)=>setNoteBody(e.target.value)}
+          />
+          <MDBox display="flex" justifyContent="space-between" alignItems="center" p={0}>
+            <p style={{fontSize:'10px'}}>Message has a limit of 1024 characters</p>
+            <p style={{fontSize:'10px',color:notebody.length>1024?'red':'black'}}>{notebody.length}/1024</p>
+          </MDBox>
+        </DialogContent>
+        <DialogActions>
+          <Button onClick={handleCloseForm}>Cancel</Button>
+          <Button disabled={title==''||notebody==''||notebody.length>1024} onClick={handleSendNotification}>Send</Button>
+        </DialogActions>
+      </Dialog>
+    </>
   );
 }
 
-export default Notifications;
+export default Users;
