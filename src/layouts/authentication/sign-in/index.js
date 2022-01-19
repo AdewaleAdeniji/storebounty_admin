@@ -40,7 +40,7 @@ import { useDispatch } from "react-redux";
 function Basic() {
   const history = useNavigate();
   const dispatch  = useDispatch();
-  const [email, setEmail] = useState("");
+  const [email, setEmail] = useState(localStorage.getItem('store_email')||'');
   const [password, setPassword] = useState("");
   const [isError, setError] = useState(false);
   const [error, setErrorText] = useState("");
@@ -57,6 +57,7 @@ function Basic() {
     toast.dismiss();
     if (log.status === 200) {
       //.console.log(log.data);
+      localStorage.setItem('store_email',email);
       const appsdata = log.data.data;
       //console.log(appsdata)
       localStorage.setItem('client_apps',JSON.stringify(appsdata));
@@ -94,6 +95,7 @@ function Basic() {
                 type="email"
                 label="Email"
                 fullWidth
+                value={email}
                 onChange={(e) => setEmail(e.target.value)}
               />
             </MDBox>
