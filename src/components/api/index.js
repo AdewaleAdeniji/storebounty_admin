@@ -61,10 +61,33 @@ export const getStats = async (page, size) => {
   );
   return PR(res);
 };
+export const getTickets = async (page, size) => {
+  const res = await getter(
+    `${config.base_url}/accounts/api/v1/support/tickets?page=${page}&size=${size}`,
+    token
+  );
+  return PR(res);
+};
+export const getTicket = async (id) => {
+  const res = await getter(
+    `${config.base_url}/accounts/api/v1/support/tickets/${id}/messages`,
+    token
+  );
+  return PR(res);
+};
 export const sendNotifications = async (title, body) => {
   const payload = { title, body };
   const res = await poster(
     `${config.base_url}/accounts/api/v1/support/notification/send`,
+    payload,
+    token
+  );
+  return PR(res);
+};
+export const sendMessage = async (message,id) => {
+  const payload = { message };
+  const res = await poster(
+    `${config.base_url}/accounts/api/v1/support/tickets/${id}/reply`,
     payload,
     token
   );

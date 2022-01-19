@@ -56,7 +56,7 @@ function Apps() {
     }
   };
   const switchApp = async (app) => {
-      console.log(app);
+      //console.log(app);
     clientApps.current_app = app;
     toast.loading('Switching app to '+app.app_name+'....');
     const res = await switchApps(app.client_id);

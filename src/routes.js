@@ -14,6 +14,8 @@ import Apps from "layouts/users/apps";
 // @mui icons
 import Icon from "@mui/material/Icon";
 import { Logout } from "layouts/authentication/logout";
+import Tickets from "layouts/tickets";
+import SupportTicket from "layouts/tickets/ticket";
 
 const routes = [
   {
@@ -89,7 +91,26 @@ const routes = [
     component: <Notifications />,
     shownav:true,
     admin:true
-  },  {
+  },
+  {
+    type: "collapse",
+    name: "Tickets",
+    key: "tickets",
+    icon: <Icon fontSize="small">chat</Icon>,
+    route: "/tickets",
+    component:<Tickets/>,
+    shownav:true,
+    admin:true
+  },
+  {
+    type: "collapse",
+    name: "Tickets",
+    key: "tickets",
+    icon: <Icon fontSize="small">chat</Icon>,
+    route: "/ticket/:id",
+    component:<SupportTicket/>,
+  }, 
+   {
     type: "collapse",
     name: "Apps",
     key: "apps",
@@ -137,6 +158,8 @@ const routes = [
     icon: <Icon fontSize="small">assignment</Icon>,
     route: "/logout",
     component: <Logout/>,
+    shownav:true,
+    admin:true
   }
   
 ];

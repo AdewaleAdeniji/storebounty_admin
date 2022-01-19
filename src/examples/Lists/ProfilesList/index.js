@@ -28,37 +28,29 @@ import MDTypography from "components/MDTypography";
 import MDAvatar from "components/MDAvatar";
 import MDButton from "components/MDButton";
 
-function ProfilesList({ title, profiles, shadow }) {
-  const renderProfiles = profiles.map(({ image, name, description, action }) => (
-    <MDBox key={name} component="li" display="flex" alignItems="center" py={1} mb={1}>
-      <MDBox mr={2}>
-        <MDAvatar src={image} alt="something here" shadow="md" />
-      </MDBox>
+function ProfilesList({ title, profiles, shadow, openTicket }) {
+
+  const renderProfiles = profiles.map(({ category, subject,id },index) => (
+    <MDBox key={index} component="li" display="flex" alignItems="center" py={1} mb={1}>
       <MDBox display="flex" flexDirection="column" alignItems="flex-start" justifyContent="center">
         <MDTypography variant="button" fontWeight="medium">
-          {name}
+          {category}
         </MDTypography>
         <MDTypography variant="caption" color="text">
-          {description}
+          {subject?.slice(0,10)}....
         </MDTypography>
       </MDBox>
       <MDBox ml="auto">
-        {action.type === "internal" ? (
-          <MDButton component={Link} to={action.route} variant="text" color="info">
-            {action.label}
-          </MDButton>
-        ) : (
           <MDButton
             component="a"
-            href={action.route}
             target="_blank"
             rel="noreferrer"
             variant="text"
-            color={action.color}
+            color="secondary"
+            onClick={()=>openTicket(id)}
           >
-            {action.label}
+            Open
           </MDButton>
-        )}
       </MDBox>
     </MDBox>
   ));
@@ -67,7 +59,7 @@ function ProfilesList({ title, profiles, shadow }) {
     <Card sx={{ height: "100%", boxShadow: !shadow && "none" }}>
       <MDBox pt={2} px={2}>
         <MDTypography variant="h6" fontWeight="medium" textTransform="capitalize">
-          {title}
+          Tickets
         </MDTypography>
       </MDBox>
       <MDBox p={2}>
